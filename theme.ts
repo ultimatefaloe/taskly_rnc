@@ -4,5 +4,6 @@ export const theme = {
   bgColor: '#fff',
   buttonColor: '#fff',
   buttonbgColor: '#000',
+  colorblue: '#0000ff',
   disrutiveColor: '#ec0808',
 };

@@ -9,55 +9,48 @@ import {
 import { theme } from "../theme";
 import ShoppingItemLIst from "../components/ShoppingItemLIst";
 import { useState } from "react";
+import { useTasks } from "../hooks/useTask.hook";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
-type TaskItems = {
+export type TaskItems = {
   id: string;
   title: string;
   isCompleted: boolean;
+  completedAt?: Date;
+  lastupdatedAt?: Date;
 };
 
-const taskList: TaskItems[] = [
-  { id: "1", title: "Working on Taskly", isCompleted: false },
-  { id: "2", title: "Buy groceries", isCompleted: false },
-  { id: "3", title: "Walk the dog", isCompleted: true },
-  { id: "4", title: "Read a book", isCompleted: true },
-  { id: "5", title: "Call mom", isCompleted: false },
-  { id: "6", title: "Call mom", isCompleted: false },
-  { id: "7", title: "Call mom", isCompleted: false },
-  { id: "8", title: "Call mom", isCompleted: false },
-  { id: "9", title: "Call mom", isCompleted: false },
-  { id: "10", title: "Call mom", isCompleted: false },
-  { id: "11", title: "Call mom", isCompleted: false },
-  { id: "12", title: "Call mom", isCompleted: false },
-  { id: "13", title: "Call mom", isCompleted: false },
-  { id: "14", title: "Call mom", isCompleted: false },
-  { id: "15", title: "Call mom", isCompleted: false },
-  { id: "16", title: "Call mom", isCompleted: false },
-  { id: "17", title: "Call mom", isCompleted: false },
-];
-
 export default function App() {
-  const [tasks, setTasks] = useState<TaskItems[]>([]);
   const [value, setValue] = useState("");
+  const {
+    tasks,
+    handleDeleteTask,
+    handleOnCompleted,
+    handleSubmit,
+    isLoading,
+  } = useTasks();
 
-  const handleSubmit = () => {
-    if (value.trim() === "") return;
-    const newTask: TaskItems = {
-      id: Date.now().toString(),
-      title: value,
-      isCompleted: false,
-    };
-    setTasks((prevTasks) => [newTask, ...prevTasks]);
-    setValue("");
-  };
+  if (isLoading) {
+    return (
+      <View style={styles.emptyList}>
+        <AntDesign name="loading" size={24} color="blue" />
+      </View>
+    );
+  }
 
   return (
     <FlatList
+      style={{ flex: 1 }}
       data={tasks}
       stickyHeaderIndices={[0]}
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
-        <ShoppingItemLIst title={item.title} isCompleted={item.isCompleted} />
+        <ShoppingItemLIst
+          data={item}
+          isCompleted={item.isCompleted}
+          onDelete={() => handleDeleteTask(item.id)}
+          onCompleted={() => handleOnCompleted(item.id)}
+        />
       )}
       ListEmptyComponent={
         <View style={styles.emptyList}>
@@ -73,7 +66,10 @@ export default function App() {
             value={value}
             onChangeText={setValue}
             returnKeyType="done"
-            onSubmitEditing={handleSubmit}
+            onSubmitEditing={() => {
+              handleSubmit(value);
+              setValue("");
+            }}
           />
         </View>
       }
@@ -83,7 +79,6 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: theme.bgColor,
   },
 
@@ -109,6 +104,6 @@ const styles = StyleSheet.create({
   emptyText: {
     color: theme.colorGray,
     fontWeight: "700",
-    fontSize: 16
+    fontSize: 16,
   },
 });
